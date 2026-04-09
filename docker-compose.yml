@@ -1,0 +1,43 @@
+services:
+
+  db:
+    image: postgres:16
+    container_name: glassieve_db
+    environment:
+      POSTGRES_DB:       submission_portal
+      POSTGRES_USER:     portal_user
+      POSTGRES_PASSWORD: portal_pass
+    volumes:
+      # Auto-runs schema.sql when the container first starts
+      - ./src/main/resources/schema.sql:/docker-entrypoint-initdb.d/schema.sql
+      # Persist DB data across restarts
+      - db_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U portal_user -d submission_portal"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  app:
+    build: .
+    container_name: glassieve_app
+    ports:
+      - "8080:8080"
+    environment:
+      DB_HOST:     db
+      DB_PORT:     5432
+      DB_NAME:     submission_portal
+      DB_USER:     portal_user
+      DB_PASSWORD: portal_pass
+    volumes:
+      # Uploaded .py files persist across container restarts
+      - submissions_data:/opt/submissions
+    depends_on:
+      db:
+        condition: service_healthy
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+
+volumes:
+  db_data:
+  submissions_data:
