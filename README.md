@@ -69,7 +69,7 @@ The following credentials are provided as your starting point.
 ### Starting the challenge
 
 ```console
-$ git clone https://github.com/hansmorillo/glassieve.git
+$ git clone https://github.com/hansmorillo/glassieve-lab.git
 $ cd glassieve
 $ docker compose up -d
 ```
